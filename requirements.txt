@@ -4,3 +4,4 @@ djangorestframework
 django-environ
 django_filter
 django-cors-headers
+django-rest-knox

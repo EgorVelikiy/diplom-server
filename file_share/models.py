@@ -1,10 +1,10 @@
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from django.conf import settings
 import uuid
 import os
 
-from users.models import User
 
 def unique_user_file_path(instance, file_name):
     name, format = os.path.splitext(file_name)
@@ -17,7 +17,7 @@ def unique_user_file_path(instance, file_name):
 
 
 class File(models.Model):
-    user = models.ForeignKey(User, related_name='files', on_delete=models.CASCADE,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='files', on_delete=models.CASCADE,
                              verbose_name='User')
     file = models.FileField(upload_to=unique_user_file_path, default=None, verbose_name="file")
     file_name = models.CharField(max_length=255, default='', blank=True)

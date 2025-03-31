@@ -7,14 +7,17 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 
 from file_share.models import File
-from users.models import User
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'password')
         read_only_fields = ['id']
-        extra_kwargs = {'password': {'write_only': True}}
     
     def validate(self, attrs):
         validate_password(attrs['password'])
@@ -57,6 +60,7 @@ class LoginSerializer(serializers.Serializer):
 
     def validate(self, data):
         user = authenticate(username=data['username'], password=data['password'])
+        print(user)
         if user is None:
             raise serializers.ValidationError("Invalid credentials")
         return {'user': user}

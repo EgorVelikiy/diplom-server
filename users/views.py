@@ -7,6 +7,7 @@ from django.contrib.auth import login, logout
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from knox.models import AuthToken
 
 from users.models import User
 from users.serializers import UserFilesSerializer, UserSerializer, LoginSerializer
@@ -40,14 +41,16 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            
+
             login(request, user)
-            
-            token, created = Token.objects.get_or_create(user=user)
-            
-            return Response({'token': token.key})
+            print(user)
+            token = AuthToken.objects.create(user=user)
+            print(token)
+
+            user_data = UserSerializer(user).data
+            return Response({'token': token[1], 'user': user_data})
         
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors)
     
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]

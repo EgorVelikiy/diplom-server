@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 
     'django_filters',
     'rest_framework',
+    'knox',
     'rest_framework.authtoken',
     'corsheaders',
     
@@ -146,7 +147,18 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTH_USER_MODEL = 'users.User'
+
 CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'authorization',
+    'content-type',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 CORS_ALLOW_METHODS = [
     "GET",
@@ -162,6 +174,6 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'knox.auth.TokenAuthentication',
     ]
 }
