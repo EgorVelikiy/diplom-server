@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
 from django.contrib.auth.password_validation import validate_password
@@ -7,9 +6,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 
 from file_share.models import File
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from users.models import User
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -19,13 +16,15 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'password')
         read_only_fields = ['id']
     
-    def validate(self, attrs):
-        validate_password(attrs['password'])
-        if User.objects.filter(username=attrs['username']):
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
             raise ValidationError('The user with this username already exists')
-        if User.objects.filter(email=attrs['email']):
+        return value
+    
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
             raise ValidationError('The user with this email already exists')
-        return attrs
+        return value
 
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data['password'])
@@ -33,12 +32,15 @@ class UserSerializer(serializers.ModelSerializer):
             validated_data.pop('is_staff')
         return super().create(validated_data)
     
-    def update(self, instance, validated_data): 
+    def update(self, instance, validated_data):
         user = self.context['request'].user
+        print(self.context['request'])
         if 'password' in validated_data:
             validated_data['password'] = make_password(validated_data['password'])
-        if (not user.is_staff or user.id == instance.id):
-            validated_data.pop('is_staff')
+        if 'is_staff' in validated_data:
+            print(user, instance)
+            if not user.is_staff:
+                validated_data.pop('is_staff')
         return super().update(instance, validated_data)
     
 class FilesSerializer(serializers.ModelSerializer):

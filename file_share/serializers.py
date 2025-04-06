@@ -5,8 +5,8 @@ from file_share.models import File
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ['id', 'user', 'file', 'file_name', 'uploaded_at', 'size', 'special_link']
-        read_only_fields = ['id', 'user', 'uploaded_at']
+        fields = ['id', 'user', 'file', 'file_name', 'comment', 'uploaded_at', 'downloaded_at', 'size', 'special_link']
+        read_only_fields = ['id', 'uploaded_at', 'downloaded_at', 'size', 'special_link']
 
     def create(self, validated_data):
         if 'file_name' in validated_data:
