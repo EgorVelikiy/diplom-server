@@ -14,6 +14,8 @@ venv/
 
 ### Project specific ###
 settings_local.py
+.env
+media/
 
 ### OS specific ###
 .DS_Store
