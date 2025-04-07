@@ -1,4 +1,3 @@
-import tzdata
 from django.utils import timezone
 from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
@@ -8,6 +7,7 @@ from rest_framework.response import Response
 from django.http import FileResponse
 from rest_framework.generics import get_object_or_404
 from file_share.permissions import IsOwnerOrReadOnly
+from uuid import uuid4
 
 from file_share.serializers import FileSerializer
 
@@ -59,4 +59,25 @@ class FilesViewSet(ModelViewSet):
         ser.save()
         return Response(ser.data)
     
-    ## spesial_link
+    def get_spesial_link(self, request, pk=None, *args, **kwargs):
+        file = get_object_or_404(self.queryset, pk=pk)
+        special_link = file.special_link
+        if not special_link:
+            uu = uuid4().hex
+            special_link = request.build_absolute_uri(f'/root/files/share_link/{uu}/')
+            print(special_link)
+            file.special_link = special_link
+            file.save()
+        print(file.special_link)
+        return Response({'special_link': special_link})
+    
+    def share_special_link(self, request, uu=None, *args, **kwargs):
+        print(request)
+        special_link = request.build_absolute_uri(f'/root/files/share_link/{uu}/')
+        print(special_link)
+        file = get_object_or_404(self.queryset, special_link=special_link)
+        print(file)
+        file.downloaded_at = timezone.now()
+        file.save()
+
+        return FileResponse(open(file.file.path, 'rb'), as_attachment=True)

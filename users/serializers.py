@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+import re
 
-from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 
@@ -18,12 +18,12 @@ class UserSerializer(serializers.ModelSerializer):
     
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
-            raise ValidationError('The user with this username already exists')
+            raise ValidationError('Пользователь с таким логином уже существует')
         return value
     
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
-            raise ValidationError('The user with this email already exists')
+            raise ValidationError('Пользователь с таким email уже существует')
         return value
 
     def create(self, validated_data):
